@@ -1142,7 +1142,16 @@
         //  removem o botão inline se ele for inserido só uma vez).
         function tryPlaceInlineBtn() {
             if (inlineBtn.isConnected) return true;
-            const buyBtn = document.querySelector('.js-addtocart, .btn-add-to-cart, [data-component="product.add-to-cart"]');
+            // Alvo preciso: o botão de compra PRINCIPAL do tema Nuvemshop (único na página).
+            let buyBtn = document.querySelector('[data-store="product-buy-button"]');
+            // Fallback: primeiro add-to-cart VISÍVEL (a página tem dezenas em carrosséis/quick-buy).
+            if (!buyBtn) {
+                const cands = document.querySelectorAll('.js-addtocart, .btn-add-to-cart, [data-component="product.add-to-cart"]');
+                for (let k = 0; k < cands.length; k++) {
+                    if (cands[k].offsetParent !== null) { buyBtn = cands[k]; break; }
+                }
+                if (!buyBtn && cands.length) buyBtn = cands[0];
+            }
             if (buyBtn && buyBtn.parentNode) {
                 buyBtn.parentNode.insertBefore(inlineBtn, buyBtn);
                 return true;
