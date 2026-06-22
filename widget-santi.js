@@ -746,20 +746,6 @@
                             <div id="q-phone-error" class="q-status-msg">N&#250;mero inv&#225;lido</div>
                         </div>
 
-                        <!-- Product photo selector (carousel) -->
-                        <div class="q-photo-selector-wrap" id="q-photo-selector-group">
-                            <span class="q-field-label">Escolha a foto do &#243;culos</span>
-                            <div class="q-photo-carousel">
-                                <button type="button" class="q-photo-arrow q-photo-arrow-left" id="q-photo-arrow-left" aria-label="Anterior">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-                                </button>
-                                <div class="q-photo-thumbs" id="q-photo-thumbs"></div>
-                                <button type="button" class="q-photo-arrow q-photo-arrow-right" id="q-photo-arrow-right" aria-label="Pr&#243;xima">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-                                </button>
-                            </div>
-                        </div>
-
                         <!-- Photo section -->
                         <p class="q-section-label">Envie sua foto</p>
                         <div class="q-tip-box">
@@ -1258,65 +1244,9 @@
         }
 
         function populateImageSelector() {
+            // Sem escolha dentro do provador: usa sempre a imagem principal do produto.
             const imgs = extractImages();
-            const group = document.getElementById('q-photo-selector-group');
-            const thumbs = document.getElementById('q-photo-thumbs');
-            const arrowL = document.getElementById('q-photo-arrow-left');
-            const arrowR = document.getElementById('q-photo-arrow-right');
-
             selectedProductImgUrl = imgs[0] || '';
-
-            if (!group || !thumbs || imgs.length <= 1) {
-                if (group) group.classList.remove('is-visible');
-                return;
-            }
-
-            while (thumbs.firstChild) thumbs.removeChild(thumbs.firstChild);
-            imgs.forEach((url, idx) => {
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'q-photo-thumb' + (idx === 0 ? ' is-selected' : '');
-                btn.dataset.url = url;
-                btn.setAttribute('aria-label', 'Foto ' + (idx + 1));
-                const img = document.createElement('img');
-                img.src = url;
-                img.alt = 'Foto ' + (idx + 1);
-                img.loading = 'lazy';
-                const check = document.createElement('span');
-                check.className = 'q-photo-thumb-check';
-                check.textContent = '✓';
-                btn.appendChild(img);
-                btn.appendChild(check);
-                btn.addEventListener('click', () => {
-                    selectedProductImgUrl = url;
-                    thumbs.querySelectorAll('.q-photo-thumb').forEach(t => t.classList.remove('is-selected'));
-                    btn.classList.add('is-selected');
-                });
-                thumbs.appendChild(btn);
-            });
-
-            group.classList.add('is-visible');
-
-            // Carrossel: setas só aparecem quando há overflow
-            if (arrowL && arrowR) {
-                const update = () => {
-                    const overflow = thumbs.scrollWidth > thumbs.clientWidth + 1;
-                    arrowL.classList.toggle('is-active', overflow);
-                    arrowR.classList.toggle('is-active', overflow);
-                    arrowL.disabled = thumbs.scrollLeft <= 0;
-                    arrowR.disabled = thumbs.scrollLeft >= thumbs.scrollWidth - thumbs.clientWidth - 1;
-                };
-                thumbs.onscroll = update;
-                window.addEventListener('resize', update);
-                requestAnimationFrame(update);
-
-                const slide = (dir) => {
-                    const amount = thumbs.clientWidth * 0.7;
-                    thumbs.scrollBy({ left: dir * amount, behavior: 'smooth' });
-                };
-                arrowL.onclick = () => slide(-1);
-                arrowR.onclick = () => slide(1);
-            }
         }
 
         function openModal() {
