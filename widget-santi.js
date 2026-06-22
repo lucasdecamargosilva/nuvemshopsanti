@@ -1137,16 +1137,28 @@
             openModal();
         });
 
-        // Posiciona acima do botão de compra
-        const buyBtn = document.querySelector('.js-addtocart, .btn-add-to-cart, [data-component="product.add-to-cart"]');
-        if (buyBtn) {
-            buyBtn.parentNode.insertBefore(inlineBtn, buyBtn);
-        } else {
-            const variantsContainer = document.querySelector('.js-product-variants');
-            if (variantsContainer) {
-                variantsContainer.parentNode.insertBefore(inlineBtn, variantsContainer.nextSibling);
+        // Posiciona acima do botão de compra — com retry + re-inserção
+        // (temas Nuvemshop que hidratam/re-renderizam a área de compra após o load
+        //  removem o botão inline se ele for inserido só uma vez).
+        function tryPlaceInlineBtn() {
+            if (inlineBtn.isConnected) return true;
+            const buyBtn = document.querySelector('.js-addtocart, .btn-add-to-cart, [data-component="product.add-to-cart"]');
+            if (buyBtn && buyBtn.parentNode) {
+                buyBtn.parentNode.insertBefore(inlineBtn, buyBtn);
+                return true;
             }
+            const variantsContainer = document.querySelector('.js-product-variants');
+            if (variantsContainer && variantsContainer.parentNode) {
+                variantsContainer.parentNode.insertBefore(inlineBtn, variantsContainer.nextSibling);
+                return true;
+            }
+            return false;
         }
+        tryPlaceInlineBtn();
+        // Observa o DOM por até 15s: re-insere se o tema apagar ou se o alvo só aparecer depois.
+        const _inlineObs = new MutationObserver(() => { tryPlaceInlineBtn(); });
+        _inlineObs.observe(document.body, { childList: true, subtree: true });
+        setTimeout(() => { _inlineObs.disconnect(); }, 15000);
         const genBtn      = document.getElementById('q-btn-generate');
         const nextBtn     = null; // single-step flow — no next button
         const phoneStep   = null;
