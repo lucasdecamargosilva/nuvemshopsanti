@@ -1653,10 +1653,31 @@ const fd = new FormData();
                         fd.append('quadril', '');
                     }
 
-                    if (prodImg) {
+                    // Envia até 3 fotos de referência do produto (frente + ângulos) — melhora a geração de óculos
+                    let allProdImgs = [];
+                    if (prodImg) allProdImgs.push(prodImg);
+                    try {
+                        const _extra = (typeof extractImages === 'function') ? extractImages() : [];
+                        for (const _u of _extra) {
+                            const _cu = String(_u).split('?')[0];
+                            if (!allProdImgs.some(p => String(p).split('?')[0] === _cu)) allProdImgs.push(_u);
+                        }
+                    } catch (_) {}
+                    allProdImgs = allProdImgs.slice(0, 3);
+                    for (let _pi = 0; _pi < allProdImgs.length; _pi++) {
                         try {
-                            const b = await fetch(prodImg).then(r => r.blob());
-                            fd.append('product_image', b, 'product.jpg');
+                            const _bb = await fetch(allProdImgs[_pi]).then(r => r.blob());
+                            if (_pi === 0) {
+                                fd.append('product_image', _bb, 'product.jpg');
+                            } else {
+                                const _b64 = await new Promise((resolve, reject) => {
+                                    const _r = new FileReader();
+                                    _r.onloadend = () => resolve(String(_r.result).split(',')[1]);
+                                    _r.onerror = reject;
+                                    _r.readAsDataURL(_bb);
+                                });
+                                fd.append('product_image_' + (_pi + 1) + '_b64', _b64);
+                            }
                         } catch (_) { }
                     }
 
