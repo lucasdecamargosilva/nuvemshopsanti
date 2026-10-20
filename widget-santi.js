@@ -2499,7 +2499,7 @@
 
             possibleContainers.forEach(c => {
 
-                if (!c.closest('#q-modal-ia')) {
+                if (!c.closest('#q-modal-ia') && !c.matches('.product-banner, [data-store="product-banner"]')) {
 
                     const foundImgs = c.querySelectorAll('img');
 
@@ -2542,6 +2542,8 @@
                 const lowerSrc = src.toLowerCase();
 
                 const invalidKeywords = ['provador', 'logo', 'provoulevou', 'icon', 'play', 'video', 'transparent', 'placeholder', 'blank', 'spacer'];
+                // banner da loja dentro da coluna da galeria (Santi 20/10: modelo com outra armação virava a referência)
+                if (img.closest('.product-banner, [data-store="product-banner"]') || /\/themes\//.test(lowerSrc) || /banner/i.test(img.alt || '')) return;
 
                 if (invalidKeywords.some(kw => lowerSrc.includes(kw))) return;
 
